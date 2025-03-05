@@ -31,7 +31,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 # Khởi tạo môi trường headless (chạy không giao diện) với pyvirtualdisplay
 # display = Display(visible=0, size=(800, 600))
 # display.start()
-
+import chromedriver_autoinstaller
+chromedriver_autoinstaller.install()
 
 def create_chrome_options():
     options = webdriver.ChromeOptions()
@@ -95,7 +96,7 @@ def run_main_selenium():
    
     for link in selected_links:
       for i in ["1", "2", "3"]:
-        driver = uc.Chrome(options=create_chrome_options())
+        driver = webdriver.Chrome(options=create_chrome_options())
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         driver.get("https://www.dailymotion.com/playlist/x9dd5m")
