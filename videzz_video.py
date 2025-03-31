@@ -7,17 +7,27 @@ from selenium.webdriver.common.action_chains import ActionChains
 import random
 from fake_useragent import UserAgent
 import pickle
-from selenium.common.exceptions import WebDriverException
+import re
+
 import chromedriver_autoinstaller
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-# Tự động cài đặt ChromeDriver
 chromedriver_autoinstaller.install()
 
-# Thời gian chạy tối đa (35 phút)
-MAX_RUN_TIME = 1600  # 35 phút (tính theo giây)
+# options = webdriver.ChromeOptions()
+# options.add_argument("--disable-blink-features=AutomationControlled")
+# ua = UserAgent()
+# options.add_argument(f"user-agent={ua.random}")
+# options.add_argument('--start-maximized')
+# options.add_argument('--no-sandbox')
+# options.add_argument('--disable-dev-shm-usage')
+# options.add_argument('--disable-gpu')
+
+# driver = uc.Chrome(options=options)
+
+# # Disable WebDriver property in JavaScript
+# driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
 def create_chrome_options():
     options = webdriver.ChromeOptions()
@@ -30,20 +40,32 @@ def create_chrome_options():
     options.add_argument('--disable-gpu')
     return options
 
+
+
 # Di chuyển chuột ngẫu nhiên
 def random_mouse_move(driver):
     try:
+        # Lấy kích thước cửa sổ hiện tại
         window_width = driver.execute_script("return window.innerWidth;")
         window_height = driver.execute_script("return window.innerHeight;")
+
+        # Di chuyển chuột trong phạm vi cửa sổ trình duyệt
         action = ActionChains(driver)
         x_offset = random.randint(-window_width//2, window_width//2)
         y_offset = random.randint(-window_height//2, window_height//2)
+
+        # Di chuyển chuột ngẫu nhiên trong phạm vi này
         action.move_by_offset(x_offset, y_offset).perform()
-        time.sleep(random.uniform(0.5, 1.5))
+        time.sleep(random.uniform(0.5, 1.5))  # Đảm bảo thời gian di chuyển không quá nhanh
+
     except WebDriverException as e:
+        # Kiểm tra và xử lý lỗi liên quan đến di chuyển chuột
         print(f"Error: {e}")
-        driver.execute_script("window.scrollBy(0, 250);")
-        time.sleep(1)
+
+        # Cuộn trang để phần tử có thể nằm trong tầm nhìn
+        driver.execute_script("window.scrollBy(0, 250);")  # Cuộn trang xuống
+        time.sleep(1)  # Thời gian nghỉ ngắn sau khi cuộn
+
 
 link_list = [
     "https://vidoza.net/ztpgu8by8ikr.html",
@@ -64,80 +86,106 @@ link_list = [
     "https://vidoza.net/fvqpwzxxds2c.html",
 ]
 
-selected_links = random.sample(link_list, 4)
-
+selected_links = random.sample(link_list, 2)
+selected_links = selected_links + selected_links
+print(len(selected_links))
 def run_main_selenium():
-    start_time = time.time()  # Lưu thời gian bắt đầu
 
     for link in selected_links:
-        for i in ["1", "2", "3"]:
-            # Kiểm tra nếu đã chạy quá 35 phút
-            if time.time() - start_time >= MAX_RUN_TIME:
-                print("Đã chạy đủ 35 phút, dừng ngay!")
-                return  # Dừng chương trình
+      for i in ["1", "2", "2"]:
+        driver = webdriver.Chrome(options=create_chrome_options())
+        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-            driver = webdriver.Chrome(options=create_chrome_options())
-            driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        driver.get("https://www.dailymotion.com/playlist/x9dd5m")
+        time.sleep(random.uniform(5, 10))
 
-            driver.get("https://www.dailymotion.com/playlist/x9dd5m")
-            time.sleep(random.uniform(10, 30))
+        driver.get(link)
+        time.sleep(random.uniform(3, 5))
+        random_mouse_move(driver)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@id='vplayer']")))
 
-            driver.get(link)
-            time.sleep(random.uniform(3, 5))
-            random_mouse_move(driver)
-
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@id='vplayer']")))
-
-            for i in range(5):
-                if time.time() - start_time >= MAX_RUN_TIME:
-                    print("Đã chạy đủ 35 phút, dừng ngay!")
-                    driver.quit()
-                    return
-                
-                try:
-                    play_button_xpath = "//button[@title='Play Video']"
-                    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, play_button_xpath)))
-                    play_button = driver.find_element(By.XPATH, play_button_xpath)
-                    driver.execute_script("arguments[0].scrollIntoView(true);", play_button)
-                    play_button.click()
-                    driver.execute_script("""
-                        var playButton = document.evaluate("//div[@id='vplayer']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                        if (playButton) {
-                            playButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            setTimeout(function() { playButton.click(); }, 500);
-                        }
-                    """)
-                    time.sleep(5)
-                    random_mouse_move(driver)
-                    random_mouse_move(driver)
-                except Exception as e:
-                    print(f"Error: {e}")
-
-            time.sleep(150)
-
-            # Kiểm tra nếu đã chạy quá 35 phút
-            if time.time() - start_time >= MAX_RUN_TIME:
-                print("Đã chạy đủ 35 phút, dừng ngay!")
-                driver.quit()
-                return
-
-            driver.quit()
-
-        download_button_xpath = "//a[@class='btn btn-success btn-lg btn-download btn-download-n']"
         for i in range(5):
-            if time.time() - start_time >= MAX_RUN_TIME:
-                print("Đã chạy đủ 35 phút, dừng ngay!")
-                driver.quit()
-                return
-
             try:
-                download_button = driver.find_element(By.XPATH, download_button_xpath)
-                download_button.click()
-                time.sleep(random.uniform(1, 3))
-                random_mouse_move(driver)
-            except Exception as e:
-                print(f"Error: {e}")
+                play_button_xpath = "//button[@title='Play Video']"
+                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, play_button_xpath)))
+                play_button = driver.find_element(By.XPATH, play_button_xpath)
+                driver.execute_script("arguments[0].scrollIntoView(true);", play_button)
+                # driver.save_screenshot("screenshot_{}.png".format(time.time()))
+                play_button.click()
 
-    print("Kết thúc Selenium bot sau 35 phút.")
+                # Click Play
+                driver.execute_script("""
+                    var playButton = document.evaluate("//div[@id='vplayer']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                    if (playButton) {
+                        playButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(function() { playButton.click(); }, 500);
+                    }""")
+                time.sleep(5)
+                driver.save_screenshot(f"screenshot_{i}.png")
+                random_mouse_move(driver)
+                random_mouse_move(driver)
+
+            except Exception as e:
+                    print(f"Error: {e}")
+                    try:
+                        driver.execute_script("""
+                                    var element = document.getElementById('vplayer');
+                                  var clickEvent = new MouseEvent('click', {
+                                    bubbles: true,
+                                    cancelable: true,
+                                    view: window
+                                  });
+                                  element.dispatchEvent(clickEvent); """)
+
+
+                        try:
+                                element = driver.find_element(By.XPATH, play_button_xpath)
+                                actions = ActionChains(driver)
+
+                                # Click tại tọa độ (x_offset, y_offset) so với phần tử
+                                actions.move_to_element_with_offset(element, 5, 5).click().perform()
+                                time.sleep(30)
+                                driver.save_screenshot("screenshot_{}.png".format(i))
+                        except Exception as e:
+                                print(f"PyAutoGUI click failed: {e}")
+
+                    except Exception as click_error:
+                        print(f"Khong the click toa do: {click_error}")
+        time.sleep(150)
+        driver.save_screenshot("screenshot_final.png")
+
+
+      # Tải video
+      download_button_xpath = "//a[@class='btn btn-success btn-lg btn-download btn-download-n']"
+      for i in range(5):
+          try:
+                  # Find and click the download button
+                  download_button = driver.find_element(By.XPATH, download_button_xpath)
+                  download_button.click()
+                  time.sleep(random.uniform(1, 3))
+                  random_mouse_move()
+                  driver.save_screenshot(f"screenshot_{i}.png")
+
+                  # Handle captcha if present
+                  try:
+                      captcha_iframe = WebDriverWait(driver, 10).until(
+                          ec.presence_of_element_located((By.TAG_NAME, 'iframe'))
+                      )
+                      ActionChains(driver).move_to_element(captcha_iframe).click().perform()
+
+                      captcha_box = WebDriverWait(driver, 10).until(
+                          ec.presence_of_element_located((By.ID, 'g-recaptcha-response'))
+                      )
+                      driver.execute_script("arguments[0].click()", captcha_box)
+                      time.sleep(10)
+                  except Exception:
+                      print("Captcha not found")
+          except Exception as e:
+                  print(f"Error: {e}")
+
+
+      # driver.save_screenshot("screenshot_{}.png".format(time.time()))
+      # time.sleep(150)
+      driver.quit()
 
 run_main_selenium()
