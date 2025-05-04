@@ -15,20 +15,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 chromedriver_autoinstaller.install()
 
-# options = webdriver.ChromeOptions()
-# options.add_argument("--disable-blink-features=AutomationControlled")
-# ua = UserAgent()
-# options.add_argument(f"user-agent={ua.random}")
-# options.add_argument('--start-maximized')
-# options.add_argument('--no-sandbox')
-# options.add_argument('--disable-dev-shm-usage')
-# options.add_argument('--disable-gpu')
-
-# driver = uc.Chrome(options=options)
-
-# # Disable WebDriver property in JavaScript
-# driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
 def create_chrome_options():
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -66,45 +52,25 @@ def random_mouse_move(driver):
         driver.execute_script("window.scrollBy(0, 250);")  # Cuộn trang xuống
         time.sleep(1)  # Thời gian nghỉ ngắn sau khi cuộn
 
+import requests
 
-link_list = [
-    "https://vidoza.net/ztpgu8by8ikr.html",
-    "https://vidoza.net/omaoqnc6mrr6.html",
-    "https://vidoza.net/iy1vzopdpztr.html",
-    "https://vidoza.net/hybefuiy04fm.html",
-    "https://vidoza.net/hwz4y0vkaoq1.html",
-    "https://vidoza.net/peigyecqfx1p.html",
-    "https://vidoza.net/98bg1sjnusu1.html",
-    "https://vidoza.net/pbzkuh20pwnj.html",
-    "https://vidoza.net/cjpgc87qip3n.html",
-    "https://vidoza.net/dy0rv0p7h3nh.html",
-    "https://vidoza.net/3xqk80ieu79e.html",
-    "https://vidoza.net/4x20dqp8mj0r.html",
-    "https://vidoza.net/pjujya2fuysm.html",
-    "https://vidoza.net/w8jecxpis8mm.html",
-    "https://vidoza.net/uxh6vhimfl6g.html",
-    "https://vidoza.net/fvqpwzxxds2c.html",
-]
+# URL chứa file .txt
+url = "https://raw.githubusercontent.com/talblubClouby96/videzz_video/refs/heads/main/links.txt"
 
-link_list2 = [
-    "https://vidoza.net/f9vlu78gt2vj.html",
-    "https://vidoza.net/8u9ti0wv4d6j.html",
-    "https://vidoza.net/yra3hrl5rc9q.html",
-    "https://vidoza.net/jffzwuq1vqhy.html",
-   "https://vidoza.net/y12z7rz8q6nm.html",
-   "https://vidoza.net/peuzdqx40851.html",
-    "https://vidoza.net/o60h83je6j00.html",
-    "https://vidoza.net/rmw582erq23j.html",
-    "https://vidoza.net/deu8rmgdc20q.html",
-    "https://vidoza.net/pa75dzhugauv.html",
-    "https://vidoza.net/lw2o42dajez1.html",
-    "https://vidoza.net/k1x9y71oncoh.html"
-]
+# Tải nội dung từ URL
+response = requests.get(url)
+response.raise_for_status()  # Gây lỗi nếu tải thất bại
 
+# Chuyển mỗi dòng thành một phần tử trong list
+link_list = response.text.strip().splitlines()
+
+# Chọn ngẫu nhiên 2 link
 selected_links = random.sample(link_list, 2)
-selected_links2 = random.sample(link_list2, 2)
-selected_links = selected_links + selected_links2
-print(len(selected_links))
+
+# Nhân đôi danh sách đã chọn
+selected_links = selected_links + selected_links
+
+print(selected_links)
 def run_main_selenium():
 
     for link in selected_links:
